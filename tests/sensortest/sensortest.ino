@@ -1,10 +1,18 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_ADXL345_U.h>
+#include <TimerOne.h>
+#include <SD.h> 
+#include <SPI.h> 
 
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
+volatile bool timerTriggered = false;
 int i = 1;
+uint32_t time = 0;
+const int chipSelect = 53; //SD card CS pin connected to pin 53 of Arduino
+File dataFile;
+
 
 void displaySensorDetails(void)
 {
@@ -108,12 +116,45 @@ void displayRange(void)
   Serial.println(" g");  
 }
 
+// interupt handler
+void timer_interrupt_handler(void){
+  time = millis();
+  timerTriggered = true;
+}
+
 void setup(void) 
 {
-#ifndef ESP8266
-  while (!Serial); // for Leonardo/Micro/Zero
-#endif
+  #ifndef ESP8266
+    while (!Serial); // for Leonardo/Micro/Zero
+  #endif
   Serial.begin(9600);
+
+  // ---------- SD card setup ----------
+  Serial.print("Initializing SD card...");
+  
+  if(!SD.begin(chipSelect)) {
+    Serial.println("initialization failed!");
+    while(1)
+    return;
+  }
+  Serial.println("initialization done.");
+    
+  //open file
+  dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
+  
+  // if the file opened ok, write to it:
+  if (dataFile) {
+    Serial.println("File opened ok");
+    // print the headings for our data
+    dataFile.println("time,accel1_x,accel1_y,accel1_z,accel2_x,accel2_y,accel2_z,accel3_x,accel3_y,accel3_z");
+  }
+  dataFile.close();
+  
+  Serial.println("CLEARDATA"); //clears up any data left from previous projects
+  //Serial.println("time,accel1_x,accel1_y,accel1_z,accel2_x,accel2_y,accel2_z,accel3_x,accel3_y,accel3_z"); //always write LABEL, to indicate it as first line
+  Serial.println("RESETTIMER");
+
+  // ---------- accelerometer setup ----------
   Serial.println("Accelerometer Test"); Serial.println("");
   
   /* Initialise the sensor */
@@ -128,7 +169,7 @@ void setup(void)
   // accel.setRange(ADXL345_RANGE_16_G);
   // accel.setRange(ADXL345_RANGE_8_G);
   // accel.setRange(ADXL345_RANGE_4_G);
-   accel.setRange(ADXL345_RANGE_2_G);
+  accel.setRange(ADXL345_RANGE_2_G);
   
   /* Display some basic information on this sensor */
   displaySensorDetails();
@@ -137,14 +178,34 @@ void setup(void)
   displayDataRate();
   displayRange();
   Serial.println("");
+
+  // set pins to output mode
   pinMode(12, OUTPUT);
   pinMode(11, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(9, OUTPUT);
+
+  // ---------- Timer setup ----------
+  Timer1.initialize(1000000); //Initialize timer with 1 second period
+  Timer1.attachInterrupt(timer_interrupt_handler);
+  delay(100);
 }
 
 void loop(void) 
 {
+
+  // writing to SD card
+  dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
+  // if the file is available, write to it:
+  if (!dataFile) {
+    Serial.println("SD card writing failed");
+    while(1) {}
+  }
+
+  while(!(timerTriggered)) {}
+
+  timerTriggered = false;
+
   /* Get a new sensor event */ 
   sensors_event_t event; 
   accel.getEvent(&event);
@@ -155,35 +216,44 @@ void loop(void)
       digitalWrite(11, HIGH);
       digitalWrite(10, HIGH);
       digitalWrite(9, HIGH);
-      delay(100);
-//      Serial.print("digital read 12: ");
-//      Serial.println(digitalRead(12));
-//      Serial.print("digital read 11: ");
-//      Serial.println(digitalRead(11));
-//      Serial.print("digital read 10: ");
-//      Serial.println(digitalRead(10));
-//      Serial.print("digital read 9: ");
-//      Serial.println(digitalRead(9));
+      //delay(100);
       Serial.println(i);
       i = 2;
+
+      // write to sd card
+      dataFile.print(time);
+      dataFile.print(event.acceleration.x); dataFile.print(",");
+      dataFile.print(event.acceleration.y); dataFile.print(",");
+      dataFile.print(event.acceleration.z); dataFile.print(",");
       break;
     case 2 :
       digitalWrite(12, HIGH);
       digitalWrite(11, LOW);
       digitalWrite(10, HIGH);
       digitalWrite(9, HIGH);
-      delay(100);
+      //delay(100);
       Serial.println(i);
       i = 3;
+
+      // write to sd card
+      dataFile.print(event.acceleration.x); dataFile.print(",");
+      dataFile.print(event.acceleration.y); dataFile.print(",");
+      dataFile.print(event.acceleration.z); dataFile.print(",");
       break;
    case 3 :
       digitalWrite(12, HIGH);
       digitalWrite(11, HIGH);
       digitalWrite(10, LOW);
       digitalWrite(9, HIGH);
-      delay(100);
+      //delay(100);
       Serial.println(i);
       i = 1;
+
+      // write to sd card
+      dataFile.print(event.acceleration.x); dataFile.print(",");
+      dataFile.print(event.acceleration.y); dataFile.print(",");
+      dataFile.print(event.acceleration.z); // dataFile.print(",");
+      dataFile.println();
       break;
 
    case 4 :
@@ -191,9 +261,14 @@ void loop(void)
       digitalWrite(11, HIGH);
       digitalWrite(10, HIGH);
       digitalWrite(9, LOW);
-      delay(100);
+      //delay(100);
       Serial.println(i);
       i = 1;
+
+      // write to sd card
+      dataFile.print(event.acceleration.x); dataFile.print(",");
+      dataFile.print(event.acceleration.y); dataFile.print(",");
+      dataFile.print(event.acceleration.z); // dataFile.print(",");
       break;
       
     default : // should never get here
@@ -201,7 +276,7 @@ void loop(void)
       digitalWrite(11, HIGH);
       digitalWrite(10, HIGH);
       digitalWrite(9, HIGH);
-      delay(100);
+      //delay(100);
       Serial.println("default");
       i = 2;
       break;
@@ -215,10 +290,13 @@ void loop(void)
   Serial.println(digitalRead(10));
   Serial.print("digital read 9: ");
   Serial.println(digitalRead(9));
- 
+
+
   /* Display the results (acceleration is measured in m/s^2) */
   Serial.print("X: "); Serial.print(event.acceleration.x); Serial.print("  ");
   Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
   Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");Serial.println("m/s^2 ");
+
+
   delay(500);
 }

@@ -44,7 +44,7 @@ def vibration_analysis(accel_readings):
 
     for i in accel_readings.columns:
         yf = scipy.fft.fft(accel_readings[i].values)
-        plt.subplot(3,1,1)
+        #plt.subplot(3,1,1)
         plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
         plt.title('vibration_data x')
 
