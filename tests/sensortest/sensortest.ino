@@ -10,7 +10,7 @@ Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
 volatile bool timerTriggered = false;
 int i = 1;
 uint32_t time = 0;
-const int chipSelect = 53; //SD card CS pin connected to pin 53 of Arduino
+const int chipSelect = 10; //SD card CS pin connected to pin 53 of Arduino
 File dataFile;
 
 
@@ -127,32 +127,45 @@ void setup(void)
   #ifndef ESP8266
     while (!Serial); // for Leonardo/Micro/Zero
   #endif
-  Serial.begin(9600);
 
   // ---------- SD card setup ----------
+  Serial.begin(9600);
+
+  // setup for the SD card
   Serial.print("Initializing SD card...");
-  
+
   if(!SD.begin(chipSelect)) {
     Serial.println("initialization failed!");
-    while(1)
     return;
   }
   Serial.println("initialization done.");
     
   //open file
+  if (SD.exists("LOGDATA.txt")) {
+    SD.remove("LOGDATA.txt"); 
+  }
   dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
-  
+
   // if the file opened ok, write to it:
   if (dataFile) {
     Serial.println("File opened ok");
     // print the headings for our data
-    dataFile.println("time,accel1_x,accel1_y,accel1_z,accel2_x,accel2_y,accel2_z,accel3_x,accel3_y,accel3_z");
+//    dataFile.println("TIME");
+//    dataFile.print("accel1_x"); dataFile.print(","); 
+//    Serial.print("accel1_x"); dataFile.print(","); 
+//    dataFile.print("accel1_y"); dataFile.print(",");
+//    Serial.print("accel1_y"); dataFile.print(","); 
+//    dataFile.print("accel1_z"); dataFile.print(","); 
+//    Serial.print("accel1_z"); dataFile.print(","); 
+  } else {
+    Serial.println("File not opened");
   }
   dataFile.close();
-  
+
   Serial.println("CLEARDATA"); //clears up any data left from previous projects
-  //Serial.println("time,accel1_x,accel1_y,accel1_z,accel2_x,accel2_y,accel2_z,accel3_x,accel3_y,accel3_z"); //always write LABEL, to indicate it as first line
+  Serial.println("Time"); //always write LABEL, to indicate it as first line
   Serial.println("RESETTIMER");
+
 
   // ---------- accelerometer setup ----------
   Serial.println("Accelerometer Test"); Serial.println("");
@@ -180,16 +193,17 @@ void setup(void)
   Serial.println("");
 
   // set pins to output mode
-  pinMode(12, OUTPUT);
-  pinMode(11, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(9, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
 
   // ---------- Timer setup ----------
   Timer1.initialize(1000000); //Initialize timer with 1 second period
   Timer1.attachInterrupt(timer_interrupt_handler);
   delay(100);
 }
+
 
 void loop(void) 
 {
@@ -212,55 +226,58 @@ void loop(void)
 
   switch(i) {
     case 1 :
-      digitalWrite(12, LOW);
-      digitalWrite(11, HIGH);
-      digitalWrite(10, HIGH);
-      digitalWrite(9, HIGH);
+      digitalWrite(7, LOW);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, HIGH);
+      digitalWrite(4, HIGH);
       //delay(100);
       Serial.println(i);
-      i = 2;
 
       // write to sd card
-      dataFile.print(time);
+//      dataFile.print(i); dataFile.print(":   ");
+      dataFile.print(time); dataFile.print(",");
       dataFile.print(event.acceleration.x); dataFile.print(",");
       dataFile.print(event.acceleration.y); dataFile.print(",");
       dataFile.print(event.acceleration.z); dataFile.print(",");
+      i = 2;
       break;
     case 2 :
-      digitalWrite(12, HIGH);
-      digitalWrite(11, LOW);
-      digitalWrite(10, HIGH);
-      digitalWrite(9, HIGH);
+      digitalWrite(7, HIGH);
+      digitalWrite(6, LOW);
+      digitalWrite(5, HIGH);
+      digitalWrite(4, HIGH);
       //delay(100);
       Serial.println(i);
-      i = 3;
 
       // write to sd card
+//      dataFile.print(i); dataFile.print(":   ");
       dataFile.print(event.acceleration.x); dataFile.print(",");
       dataFile.print(event.acceleration.y); dataFile.print(",");
       dataFile.print(event.acceleration.z); dataFile.print(",");
+      i = 3;
       break;
    case 3 :
-      digitalWrite(12, HIGH);
-      digitalWrite(11, HIGH);
-      digitalWrite(10, LOW);
-      digitalWrite(9, HIGH);
+      digitalWrite(7, HIGH);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, LOW);
+      digitalWrite(4, HIGH);
       //delay(100);
       Serial.println(i);
-      i = 1;
 
       // write to sd card
+//      dataFile.print(i); dataFile.print(":   ");
       dataFile.print(event.acceleration.x); dataFile.print(",");
       dataFile.print(event.acceleration.y); dataFile.print(",");
       dataFile.print(event.acceleration.z); // dataFile.print(",");
       dataFile.println();
+      i = 1;
       break;
 
    case 4 :
-      digitalWrite(12, HIGH);
-      digitalWrite(11, HIGH);
-      digitalWrite(10, HIGH);
-      digitalWrite(9, LOW);
+      digitalWrite(7, HIGH);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, HIGH);
+      digitalWrite(4, LOW);
       //delay(100);
       Serial.println(i);
       i = 1;
@@ -272,24 +289,26 @@ void loop(void)
       break;
       
     default : // should never get here
-      digitalWrite(12, LOW);
-      digitalWrite(11, HIGH);
-      digitalWrite(10, HIGH);
-      digitalWrite(9, HIGH);
+      digitalWrite(7, LOW);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, HIGH);
+      digitalWrite(4, HIGH);
       //delay(100);
       Serial.println("default");
       i = 2;
       break;
   }
 
-  Serial.print("digital read 12: ");
-  Serial.println(digitalRead(12));
-  Serial.print("digital read 11: ");
-  Serial.println(digitalRead(11));
-  Serial.print("digital read 10: ");
-  Serial.println(digitalRead(10));
-  Serial.print("digital read 9: ");
-  Serial.println(digitalRead(9));
+  Serial.print("time: ");
+  Serial.println(time);
+  Serial.print("digital read 7: ");
+  Serial.println(digitalRead(7));
+  Serial.print("digital read 6: ");
+  Serial.println(digitalRead(6));
+  Serial.print("digital read 5: ");
+  Serial.println(digitalRead(5));
+  Serial.print("digital read 4: ");
+  Serial.println(digitalRead(4));
 
 
   /* Display the results (acceleration is measured in m/s^2) */
@@ -297,6 +316,6 @@ void loop(void)
   Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
   Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");Serial.println("m/s^2 ");
 
-
-  delay(500);
+  dataFile.close();
+  //delay(500);
 }

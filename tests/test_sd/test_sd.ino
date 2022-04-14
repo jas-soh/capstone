@@ -4,7 +4,7 @@
 // ---------- macros ----------
 File dataFile; 
 
-const int chipSelect = 4; //SD card CS pin connected to pin 53 of Arduino
+const int chipSelect = 10; //SD card CS pin connected to pin 53 of Arduino
 // -----------------------------
 
 
@@ -23,6 +23,7 @@ void setup()
   Serial.println("initialization done.");
     
   //open file
+  SD.remove("LOGDATA.txt");  
   dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
 
   // if the file opened ok, write to it:
@@ -30,6 +31,14 @@ void setup()
     Serial.println("File opened ok");
     // print the headings for our data
     dataFile.println("Time");
+    dataFile.print("accel1_x"); dataFile.print(","); 
+    Serial.print("accel1_x"); dataFile.print(","); 
+    dataFile.print("accel1_y"); dataFile.print(",");
+    Serial.print("accel1_y"); dataFile.print(","); 
+    dataFile.print("accel1_z"); dataFile.print(","); 
+    Serial.print("accel1_z"); dataFile.print(","); 
+  } else {
+    Serial.println("File not opened");
   }
   dataFile.close();
 
