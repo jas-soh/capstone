@@ -35,30 +35,21 @@ def strain_analysis(material_const,strain_gauge_readings):
 def rainflow_analysis():
     return
 
-def vibration_analysis(accel_readings):
+def vibration_analysis():
     # to get the sampling rate, one time
-    yf = scipy.fft.fft(accel_readings['accel1_x'].values)
+    data = pd.read_csv('vibration_data.csv')
+
+    yf = scipy.fft.fft(data['ax'].values)
     x = scipy.fftpack.fftfreq(yf.size, 1 / 100)
 
     fig = plt.figure(figsize=(6,12))
 
-    for i in accel_readings.columns:
-        yf = scipy.fft.fft(accel_readings[i].values)
-        #plt.subplot(3,1,1)
-        plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
-        plt.title('vibration_data x')
-
-        # yf = scipy.fft.fft(accel_readings[i+2].values)
-        # plt.subplot(3,1,2)
-        # plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
-        # plt.title('vibration_data y')
-
-        # yf = scipy.fft.fft(accel_readings[i+3].values)
-        # plt.subplot(3,1,3)
-        # plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
-        # plt.title('vibration_data z')
-
-        plt.show()
+    yf = scipy.fft.fft(data['ax'].values)
+    plt.subplot(3,1,1)
+    plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
+    plt.title('vibration_data x')
+    plt.show()
+    
     return
 
 def main():
