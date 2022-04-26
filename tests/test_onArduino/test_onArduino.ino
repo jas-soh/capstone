@@ -13,9 +13,10 @@ int ADXLAddress = 0x53; // Device address in which is also included the 8th bit 
 const int chipSelect = 10; //SD card CS pin connected to pin 53 of Arduino
 File dataFile;
 File strainFile;
-CircularBuffer<int, 100> buffer;
+CircularBuffer<uint16_t, 200> buffer;
 volatile bool enable = false;
 int sample_strain = 0;
+unsigned long time = 0;
 
 // ------------------ strain ---------------------------
 WheatstoneBridge wsb_strain1(A0, 365, 675, 0, 1000);
@@ -106,11 +107,11 @@ void get_strain(void) {
   valRaw3 = wsb_strain3.getLastForceRawADC();
   val4 = wsb_strain4.measureForce();
   valRaw4 = wsb_strain4.getLastForceRawADC();
-  buffer.push(millis());
-  buffer.push(valRaw1);
-  buffer.push(valRaw2);
-  buffer.push(valRaw3);
-  buffer.push(valRaw4);
+  buffer.push(time);
+  buffer.push((uint8_t)valRaw1);
+  buffer.push((uint8_t)valRaw2);
+  buffer.push((uint8_t)valRaw3);
+  buffer.push((uint8_t)valRaw4);
 }
 
 void isr(void) {
@@ -125,9 +126,9 @@ void isr(void) {
 
 void setup(void) 
 {
-  // turn on built-in LED
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+//  // turn on built-in LED
+//  pinMode(LED_BUILTIN, OUTPUT);
+//  digitalWrite(LED_BUILTIN, HIGH);
 
   // ---------- SD card setup ----------
 
@@ -193,10 +194,10 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-      int time = millis();
-      int8_t X1 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
-      int8_t Y1 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
-      int8_t Z1 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      time = millis();
+      uint8_t X1 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      uint8_t Y1 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      uint8_t Z1 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -212,10 +213,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-//      int time = millis();
-      int8_t X2 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
-      int8_t Y2 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
-      int8_t Z2 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      uint8_t X2 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      uint8_t Y2 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      uint8_t Z2 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -231,10 +231,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-//      int time = millis();
-      int8_t X3 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
-      int8_t Y3 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
-      int8_t Z3 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      uint8_t X3 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      uint8_t Y3 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      uint8_t Z3 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -250,10 +249,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-//      int time = millis();
-      int8_t X4 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
-      int8_t Y4 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
-      int8_t Z4 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      uint8_t X4 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      uint8_t Y4 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      uint8_t Z4 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -274,8 +272,9 @@ void loop() {
 
     // write data from buffer to strain data file
     strainFile = SD.open("STRAIN.txt",FILE_WRITE);
+    
     while (buffer.size() >= 5) {
-      uint8_t time = buffer.first();
+      time = buffer.first();
       buffer.shift();
       strainFile.print(time);strainFile.print(",");
       for (int i = 1; i < 4; i++) {
@@ -286,10 +285,11 @@ void loop() {
       strainFile.println(buffer.first());
       buffer.shift();
     }
+
     strainFile.close();
 
-    // all files are closed, turn off built-in LED to indicate ok to remove SD card
-    digitalWrite(LED_BUILTIN, LOW);
+//    // all files are closed, turn off built-in LED to indicate ok to remove SD card
+//    digitalWrite(LED_BUILTIN, LOW);
     while(1);
   }
 }
