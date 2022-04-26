@@ -27,7 +27,7 @@ void displaySensorDetails(void)
   Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" m/s^2");  
   Serial.println("------------------------------------");
   Serial.println("");
-  delay(500);
+  delay(100);
 }
 
 void displayDataRate(void)
@@ -119,6 +119,8 @@ void displayRange(void)
 // interupt handler
 void timer_interrupt_handler(void){
   time = millis();
+  //time = micros();
+  //time = time / 1000;
   timerTriggered = true;
 }
 
@@ -129,7 +131,7 @@ void setup(void)
   #endif
 
   // ---------- SD card setup ----------
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // setup for the SD card
   Serial.print("Initializing SD card...");
@@ -199,7 +201,10 @@ void setup(void)
   pinMode(7, OUTPUT);
 
   // ---------- Timer setup ----------
-  Timer1.initialize(1000000); //Initialize timer with 1 second period
+  //Timer1.initialize(1000000); //Initialize timer with 1 second 
+  //Timer1.initialize(1000); //Initialize timer with 1 millisecond period
+  Timer1.initialize(); //Initialize timer with 1 millisecond period
+  Timer1.setPeriod(10);
   Timer1.attachInterrupt(timer_interrupt_handler);
   delay(100);
 }
@@ -230,15 +235,12 @@ void loop(void)
       digitalWrite(6, HIGH);
       digitalWrite(5, HIGH);
       digitalWrite(4, HIGH);
-      //delay(100);
-      Serial.println(i);
 
       // write to sd card
-//      dataFile.print(i); dataFile.print(":   ");
-      dataFile.print(time); dataFile.print(",");
-      dataFile.print(event.acceleration.x); dataFile.print(",");
-      dataFile.print(event.acceleration.y); dataFile.print(",");
-      dataFile.print(event.acceleration.z); dataFile.print(",");
+//      dataFile.print(millis()); dataFile.print(",");
+//      dataFile.print(event.acceleration.x); dataFile.print(",");
+//      dataFile.print(event.acceleration.y); dataFile.print(",");
+//      dataFile.print(event.acceleration.z); dataFile.print(",");
       i = 2;
       break;
     case 2 :
@@ -246,14 +248,11 @@ void loop(void)
       digitalWrite(6, LOW);
       digitalWrite(5, HIGH);
       digitalWrite(4, HIGH);
-      //delay(100);
-      Serial.println(i);
 
       // write to sd card
-//      dataFile.print(i); dataFile.print(":   ");
-      dataFile.print(event.acceleration.x); dataFile.print(",");
-      dataFile.print(event.acceleration.y); dataFile.print(",");
-      dataFile.print(event.acceleration.z); dataFile.print(",");
+//      dataFile.print(event.acceleration.x); dataFile.print(",");
+//      dataFile.print(event.acceleration.y); dataFile.print(",");
+//      dataFile.print(event.acceleration.z); dataFile.print(",");
       i = 3;
       break;
    case 3 :
@@ -261,14 +260,11 @@ void loop(void)
       digitalWrite(6, HIGH);
       digitalWrite(5, LOW);
       digitalWrite(4, HIGH);
-      //delay(100);
-      Serial.println(i);
 
       // write to sd card
-//      dataFile.print(i); dataFile.print(":   ");
-      dataFile.print(event.acceleration.x); dataFile.print(",");
-      dataFile.print(event.acceleration.y); dataFile.print(",");
-      dataFile.print(event.acceleration.z); // dataFile.print(",");
+//      dataFile.print(event.acceleration.x); dataFile.print(",");
+//      dataFile.print(event.acceleration.y); dataFile.print(",");
+//      dataFile.print(event.acceleration.z); // dataFile.print(",");
       dataFile.println();
       i = 1;
       break;
@@ -283,9 +279,9 @@ void loop(void)
       i = 1;
 
       // write to sd card
-      dataFile.print(event.acceleration.x); dataFile.print(",");
-      dataFile.print(event.acceleration.y); dataFile.print(",");
-      dataFile.print(event.acceleration.z); // dataFile.print(",");
+//      dataFile.print(event.acceleration.x); dataFile.print(",");
+//      dataFile.print(event.acceleration.y); dataFile.print(",");
+//      dataFile.print(event.acceleration.z); // dataFile.print(",");
       break;
       
     default : // should never get here
@@ -299,23 +295,23 @@ void loop(void)
       break;
   }
 
-  Serial.print("time: ");
-  Serial.println(time);
-  Serial.print("digital read 7: ");
-  Serial.println(digitalRead(7));
-  Serial.print("digital read 6: ");
-  Serial.println(digitalRead(6));
-  Serial.print("digital read 5: ");
-  Serial.println(digitalRead(5));
-  Serial.print("digital read 4: ");
-  Serial.println(digitalRead(4));
+//  Serial.print("time: ");
+//  Serial.println(time);
+//  Serial.print("digital read 7: ");
+//  Serial.println(digitalRead(7));
+//  Serial.print("digital read 6: ");
+//  Serial.println(digitalRead(6));
+//  Serial.print("digital read 5: ");
+//  Serial.println(digitalRead(5));
+//  Serial.print("digital read 4: ");
+//  Serial.println(digitalRead(4));
 
 
   /* Display the results (acceleration is measured in m/s^2) */
-  Serial.print("X: "); Serial.print(event.acceleration.x); Serial.print("  ");
-  Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
-  Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");Serial.println("m/s^2 ");
-
+  Serial.println(time);
+//  Serial.print(" X: "); Serial.print(event.acceleration.x); Serial.print("  ");
+//  Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
+//  Serial.print("Z: "); Serial.println(event.acceleration.z);
   dataFile.close();
   //delay(500);
 }

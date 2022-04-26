@@ -19,7 +19,7 @@ int valRaw3;
 int val4;
 int valRaw4;
 
-const int chipSelect = 53; //SD card CS pin connected to pin 53 of Arduino
+const int chipSelect = 10; //SD card CS pin connected to pin 53 of Arduino
 
 void setup() {
   Serial.begin(9600);

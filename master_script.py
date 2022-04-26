@@ -1,7 +1,9 @@
 import pandas as pd
+import numpy as np
 import scipy
 import scipy.fft
 import scipy.fftpack
+import scipy.signal
 import matplotlib.pyplot as plt
 
 
@@ -35,41 +37,92 @@ def strain_analysis(material_const,strain_gauge_readings):
 def rainflow_analysis():
     return
 
-def vibration_analysis(accel_readings):
+#def vibration_analysis(accel_readings):
+def vibration_analysis(data):
     # to get the sampling rate, one time
-    yf = scipy.fft.fft(accel_readings['accel1_x'].values)
+    
+    # data = pd.read_csv("LOGDATA.csv", sep=',')
+    # yf = scipy.fft.fft(data['accel2_x'].values)
+    # x = scipy.fftpack.fftfreq(yf.size, 1 / 100)
+
+    yf = scipy.fft.fft(data)
     x = scipy.fftpack.fftfreq(yf.size, 1 / 100)
 
     fig = plt.figure(figsize=(6,12))
+    data_centered = data - np.mean(data)
+    yf = scipy.fft.fft(data_centered)
+    plt.subplot(3,1,1)
+    plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
+    plt.title('vibration_data x')
 
-    for i in accel_readings.columns:
-        yf = scipy.fft.fft(accel_readings[i].values)
-        #plt.subplot(3,1,1)
-        plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
-        plt.title('vibration_data x')
+    
+    
+    plt.subplot(3,1,2)
+    #plt.plot(data['time'],data['accel2_z'])
+    t = np.linspace(0,3390,num=339)
+    plt.plot(t,data_centered)
+    # plt.xlim(600,2000)
 
-        # yf = scipy.fft.fft(accel_readings[i+2].values)
-        # plt.subplot(3,1,2)
-        # plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
-        # plt.title('vibration_data y')
+    plt.show()
 
-        # yf = scipy.fft.fft(accel_readings[i+3].values)
-        # plt.subplot(3,1,3)
-        # plt.plot(x[:x.size//2], abs(yf)[:yf.size//2])
-        # plt.title('vibration_data z')
+    return data_centered
 
-        plt.show()
-    return
+def butter_lowpass_filter(data, fs, order):
+    nyq = fs / 2
+    # Get the filter coefficients 
+    # b, a = scipy.signal.butter(order, normal_cutoff, btype='low', analog=False)
+    fc = 5  # Cut-off frequency of the filter
+    w = fc / (fs / 2) # Normalize the frequency
+    b, a = scipy.signal.butter(order, w, 'low',analog=False)
+    y = scipy.signal.filtfilt(b, a, data['accel1_z'])
+    x = np.linspace(0,33900,num=339)
+    plt.plot(x,data['accel1_z'],color='blue')
+    plt.plot(x,y,color='red')
+    plt.show()
+    return y
+
+def filter(data):
+    sig_fft = scipy.fft.fft(data)
+
+    sig_fft_filtered = sig_fft.copy()
+    freq = scipy.fft.fftfreq(len(data), d=1./100)
+
+    # define the cut-off frequency
+    cut_off = 30
+
+    sig_fft_filtered[np.abs(freq) < cut_off] = 0
+
+    filtered = scipy.fft.ifft(sig_fft_filtered)
+
+    t = np.linspace(0,len(data)*0.1, num=339)
+
+    plt.plot(t,filtered)
+    plt.show()
+
+    yf = scipy.fft.fft(filtered)
+    x = scipy.fftpack.fftfreq(yf.size, 1 / 100)
+
+    fig = plt.figure(figsize=(6,12))
+    data_centered = filtered - np.mean(filtered)
+    yf = scipy.fft.fft(data_centered)
+    plt.subplot(3,1,1)
+    plt.stem(x[:x.size//2], abs(yf)[:yf.size//2])
+    plt.title('vibration_data x')
+    plt.show()
+
 
 def main():
-    filename = "LOGDATA.TXT"
+    filename = "LOGDATA.CSV"
     material_const = 0.002 # todo
 
     data_df = csv_to_df(filename)
 
-    strain_gauge_readings, accel_readings = split_data(data_df)
-    strain_analysis(material_const, strain_gauge_readings)
-    vibration_analysis(accel_readings)
-    
+    #strain_gauge_readings, accel_readings = split_data(data_df)
+    #strain_analysis(material_const, strain_gauge_readings)
+    #vibration_analysis(accel_readings)
+    # filtered_data = butter_lowpass_filter(data_df,100,2)
+    filter(data_df['accel1_z'])
+    # vibration_analysis(filtered_data)
+
 
 main()
