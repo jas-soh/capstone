@@ -13,6 +13,7 @@ File dataFile;
 CircularBuffer<int16_t, 210> buffer;
 volatile bool enable = false;
 bool isAccel_1 = true;
+int accel_num = 1;
 
 void acc_init(void) {
 
@@ -130,101 +131,116 @@ void setup(void)
   Timer1.setPeriod(10000);
   Timer1.attachInterrupt(isr);
   delay(100);
+
+  dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
+
+//  digitalWrite(7, LOW);
+//  digitalWrite(6, HIGH);
+//  digitalWrite(5, HIGH);
+//  digitalWrite(4, HIGH); 
 }
 
-
-// ------------------------
-
-void sample() {
-    
-  // === Read acceleromter data === //
-  Wire.beginTransmission(0x53);
-  Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
-  Wire.endTransmission(false);
-  Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
-
-// ----------------------------
-  float X = ( Wire.read()| Wire.read() << 8); // X-axis value
-  float Y = ( Wire.read()| Wire.read() << 8); // Y-axis value
-  float Z = ( Wire.read()| Wire.read() << 8); // Z-axis value
-
-// ------------------------------
-
-  Wire.endTransmission();
-
-// -------------------------------
-  if (isAccel_1) {
-    buffer.push(millis());
-  }
-  buffer.push(int16_t(X*100));
-  buffer.push(int16_t(Y*100));
-  buffer.push(int16_t(Z*100));
-// -------------------------------
-  
-}
 
 
 // -----------------------
 
-void checkFull () {
-
-  if (buffer.available() < 4) {
-    Timer1.stop();
-    dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
-    if (!dataFile) {
-      while(1) {}
-    }
-
-    while (buffer.size() >= 10) {
-      
-      for (int i = 0; i < 9; i++) {
-        dataFile.print(buffer.first()); dataFile.print(",");
-        buffer.shift();
-      }
-      dataFile.println(buffer.first());
-      buffer.shift();
-
-    }
-    buffer.clear();
-//    dataFile.println(); // maybe remove this one
-    dataFile.close();
-    Timer1.start();
-  }
-}
-
 void loop() {
-  if (enable && (millis() < 10000)) {
-    isAccel_1 = true;
-    digitalWrite(7, LOW);
-    digitalWrite(6, HIGH);
-    digitalWrite(5, HIGH);
-    digitalWrite(4, HIGH); 
-    sample();
+  dataFile = SD.open("LOGDATA.txt", FILE_WRITE);
+
+  while (millis() < 10000) {
+    if (enable) {
+
+    // ------------------------------
+      digitalWrite(7, LOW);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, HIGH);
+      digitalWrite(4, HIGH); 
     
-    isAccel_1 = false;
-    digitalWrite(7, HIGH);
-    digitalWrite(6, LOW);
-    digitalWrite(5, HIGH);
-    digitalWrite(4, HIGH); 
-    sample();
+      // === Read acceleromter data === //
+      Wire.beginTransmission(0x53);
+      Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
+      Wire.endTransmission(false);
+      Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+    
+      int time = millis();
+      int8_t X1 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y1 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int8_t Z1 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      Wire.endTransmission();
+    
+    // ------------------------------
 
-    isAccel_1 = false;
-    digitalWrite(7, HIGH);
-    digitalWrite(6, HIGH);
-    digitalWrite(5, LOW);
-    digitalWrite(4, HIGH); 
-    sample();
-    checkFull();
+      digitalWrite(7, HIGH);
+      digitalWrite(6, LOW);
+      digitalWrite(5, HIGH);
+      digitalWrite(4, HIGH); 
+    
+      // === Read acceleromter data === //
+      Wire.beginTransmission(0x53);
+      Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
+      Wire.endTransmission(false);
+      Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+    
+//      int time = millis();
+      int8_t X2 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y2 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int16_t Z2 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      Wire.endTransmission();
+    
+    // ------------------------------
+
+      digitalWrite(7, HIGH);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, LOW);
+      digitalWrite(4, HIGH); 
+    
+      // === Read acceleromter data === //
+      Wire.beginTransmission(0x53);
+      Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
+      Wire.endTransmission(false);
+      Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+    
+//      int time = millis();
+      int8_t X3 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y3 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int8_t Z3 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      Wire.endTransmission();
+    
+    // ------------------------------
+
+      digitalWrite(7, HIGH);
+      digitalWrite(6, HIGH);
+      digitalWrite(5, LOW); // change
+      digitalWrite(4, HIGH); 
+    
+      // === Read acceleromter data === //
+      Wire.beginTransmission(0x53);
+      Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
+      Wire.endTransmission(false);
+      Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+    
+//      int time = millis();
+      int8_t X4 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y4 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int8_t Z4 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
+      Wire.endTransmission();
+    
+    // ------------------------------
+    
+      dataFile.print(time);dataFile.print(",");
+      dataFile.print(X1);dataFile.print(",");dataFile.print(Y1);dataFile.print(",");dataFile.print(Z1);dataFile.print(",");
+      dataFile.print(X2);dataFile.print(",");dataFile.print(Y2);dataFile.print(",");dataFile.print(Z2);dataFile.print(",");
+      dataFile.print(X3);dataFile.print(",");dataFile.print(Y3);dataFile.print(",");dataFile.print(Z3);dataFile.print(",");
+      dataFile.print(X4);dataFile.print(",");dataFile.print(Y4);dataFile.print(",");dataFile.println(Z4);
+
+      enable = false;
+    }
   
-//    digitalWrite(7, HIGH);
-//    digitalWrite(6, HIGH);
-//    digitalWrite(5, HIGH);
-//    digitalWrite(4, LOW); 
-//    sample();
-
-    enable = false;
   }
+  dataFile.close();
+      
   if (millis() > 10000) {
+//    dataFile.close();
     Serial.println("finished");
     dataFile = SD.open("LOGDATA.txt");
     while (dataFile.available()) {
