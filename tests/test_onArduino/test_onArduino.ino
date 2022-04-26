@@ -108,10 +108,10 @@ void get_strain(void) {
   val4 = wsb_strain4.measureForce();
   valRaw4 = wsb_strain4.getLastForceRawADC();
   buffer.push(time);
-  buffer.push((uint8_t)valRaw1);
-  buffer.push((uint8_t)valRaw2);
-  buffer.push((uint8_t)valRaw3);
-  buffer.push((uint8_t)valRaw4);
+  buffer.push(valRaw1);
+  buffer.push(valRaw2);
+  buffer.push(valRaw3);
+  buffer.push(valRaw4);
 }
 
 void isr(void) {
