@@ -191,7 +191,23 @@ void setup(void)
 
 }
 
+// ---------------------------------
 
+void merge_files() {
+  dataFile = SD.open("LOGDATA.txt");
+  strainFile = SD.open("STRAIN.txt");
+  finalFile = SD.open("FINAL_DATA.txt");
+
+  while (dataFile.available()) {
+     Serial.write(dataFile.read());
+  }
+
+  while (strainFile.available()) {
+     Serial.write(strainFile.read());
+  }
+}
+
+// --------------------------------
 
 // -----------------------
 
