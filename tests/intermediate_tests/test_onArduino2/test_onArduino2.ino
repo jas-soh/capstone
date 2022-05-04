@@ -117,14 +117,13 @@ void get_strain(void) {
 
 void isr(void) {
   enable = true;
-  if (sample_strain == 20) {
-    get_strain();
-    sample_strain = 0;
-  } else {
-    sample_strain++;
-  }
+//  if (sample_strain == 20) {
+//    get_strain();
+//    sample_strain = 0;
+//  } else {
+//    sample_strain++;
+//  }
 }
-
 
 
 void setup(void) 
@@ -147,6 +146,7 @@ void setup(void)
   // if the file opened ok, write to it:
   if (!dataFile) {
     dataFile.println("Data file not opened");
+    digitalWrite(34, LOW);
   }
   dataFile.close();
 
@@ -159,6 +159,11 @@ void setup(void)
   Timer1.initialize(); //Initialize timer with 1 millisecond period
   Timer1.setPeriod(10000);
   Timer1.attachInterrupt(isr);
+
+  Timer3.initialize(); //Initialize timer with 1 millisecond period
+  Timer3.setPeriod(100000);
+  Timer3.attachInterrupt(get_strain);
+  
   delay(100);
 
   if (SD.exists("STRAIN.txt")) {
@@ -167,6 +172,7 @@ void setup(void)
   strainFile = SD.open("STRAIN.txt", FILE_WRITE);
   if (!strainFile) {
     strainFile.println("Strain file not opened");
+    digitalWrite(34, LOW);
     while(1);
   }
   strainFile.close();
@@ -180,6 +186,7 @@ void setup(void)
   if (! rtc.begin()) {
 //    Serial.println("Couldn't find RTC");
 //    Serial.flush();
+    digitalWrite(34, LOW);
     while (1);
   }
 
@@ -197,7 +204,7 @@ void loop() {
   DateTime now = rtc.now();
   dataFile.print(now.hour());dataFile.print(":");dataFile.print(now.minute());dataFile.print(":");dataFile.println(now.second());
 
-  while (millis() < 2000) {
+  while (millis() < 5000) {
     if (enable) {
 
       time = millis() - start_millis;
@@ -214,9 +221,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-      uint8_t X1 = (( Wire.read()| Wire.read() << 8)); // X-axis value
-      uint8_t Y1 = (( Wire.read()| Wire.read() << 8)); // Y-axis value
-      uint8_t Z1 = (( Wire.read()| Wire.read() << 8)); // Z-axis value
+      int8_t X1 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y1 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int8_t Z1 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -232,9 +239,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-      uint8_t X2 = (( Wire.read()| Wire.read() << 8)); // X-axis value
-      uint8_t Y2 = (( Wire.read()| Wire.read() << 8)); // Y-axis value
-      uint8_t Z2 = (( Wire.read()| Wire.read() << 8)); // Z-axis value
+      int8_t X2 = (( Wire.read()| Wire.read() << 8) * 10); // X-axis value
+      int8_t Y2 = (( Wire.read()| Wire.read() << 8) * 10); // Y-axis value
+      int8_t Z2 = (( Wire.read()| Wire.read() << 8) * 10); // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -250,9 +257,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-      uint16_t X3 = (( Wire.read()| Wire.read() << 8) * 100); // X-axis value
-      uint16_t Y3 = (( Wire.read()| Wire.read() << 8) * 100); // Y-axis value
-      uint16_t Z3 = (( Wire.read()| Wire.read() << 8) * 100); // Z-axis value
+      int8_t X3 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y3 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int8_t Z3 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------
@@ -268,9 +275,9 @@ void loop() {
       Wire.endTransmission(false);
       Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
     
-      uint16_t X4 = ( Wire.read()| Wire.read() << 8) * 100; // X-axis value
-      uint16_t Y4 = ( Wire.read()| Wire.read() << 8) * 100; // Y-axis value
-      uint16_t Z4 = ( Wire.read()| Wire.read() << 8) * 100; // Z-axis value
+      int8_t X4 = ( Wire.read()| Wire.read() << 8) * 10; // X-axis value
+      int8_t Y4 = ( Wire.read()| Wire.read() << 8) * 10; // Y-axis value
+      int8_t Z4 = ( Wire.read()| Wire.read() << 8) * 10; // Z-axis value
       Wire.endTransmission();
     
     // ------------------------------

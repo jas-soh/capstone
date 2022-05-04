@@ -78,7 +78,21 @@ def threshold_noise_filter(yf,percent):
 def psd(x,fs):
     f, Pxx_den = periodogram(x, fs)
     plt.plot(f, Pxx_den)
+    plt.xlabel('frequency [Hz]')
+    plt.ylabel('PSD [V**2/Hz]')
     plt.show()
+
+    return f, Pxx_den
+    
+
+def psd_analysis(f, Pxx_den):
+    data = []
+    for i in range(len(f)):
+        data.append([f[i], Pxx_den[i]])
+
+    # sortedArr = arr2D[arr2D[:,columnIndex].argsort()]
+    # sorted_data = data[data[:,1].argsort()]
+    print(data)
 
 def butter_lowpass_filter(data, fs):
     '''
@@ -104,8 +118,8 @@ def butter_lowpass_filter(data, fs):
 def main():
     #filename = "LOGDATA.CSV"
     accel_filename = "data/ACCEL.txt"
-    accel_filename = ("data/accelerometer.csv")
-    # accel_filename = ("data/vibrations.csv")
+    # accel_filename = ("data/accelerometer.csv")
+    accel_filename = ("data/vibrations.csv")
     accel_df = csv_to_df(accel_filename)
     # strain_filename = "STRAIN.txt"
     # strain_df = csv_to_df(strain_filename)
@@ -119,12 +133,13 @@ def main():
 
     filtered1_x = butter_lowpass_filter(np.array(accel_df['accel1_x']),fs)
     # filtered1_y = butter_lowpass_filter(np.array(accel_df['accel1_y']), fs)
-    # filtered1_z1= butter_lowpass_filter(np.array(accel_df['accel1_z']), 100)
+    # filtered1_z= butter_lowpass_filter(np.array(accel_df['accel1_z']), 100)
 
-    # vibration_analysis(filtered_x1, fs)
+    # vibration_analysis(filtered_x1, fs
 
-    # psd(filtered1_x,fs)
+    f, Pxx_den = psd(filtered1_x,fs)
+    psd_analysis(f, Pxx_den)
     
-    vibration_analysis(filtered1_x, fs)
+    # vibration_analysis(filtered1_x, fs)
 
 main()
