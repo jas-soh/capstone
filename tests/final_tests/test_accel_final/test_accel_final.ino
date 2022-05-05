@@ -5,11 +5,14 @@
 #include <WheatstoneBridge.h>
 #include <RTClib.h>
 
-int ADXLAddress = 0x53; // Device address in which is also included the 8th bit for selecting the mode, read in this case.
 
 #define X_Axis_Register_DATAX0 0x32 // Hexadecimal address for the DATAX0 internal register.
 #define X_Axis_Register_DATAX1 0x33 // Hexadecimal address for the DATAX1 internal register.
 #define Power_Register 0x2D // Power Control Register
+
+unsigned long testing_time = 75000; // change this to change the length of time (in milliseconds) to record data; 75000 is 1 minute 15 seconds
+
+int ADXLAddress = 0x53; // Device address in which is also included the 8th bit for selecting the mode, read in this case.
 const int chipSelect = 53; //SD card CS pin connected to pin 53 of Arduino
 File dataFile;
 volatile bool enable = false;
@@ -124,15 +127,16 @@ void setup(void)
   Timer1.attachInterrupt(isr);
 
   // SETUP RTC MODULE
-  if (! rtc.begin()) {
+//  if (! rtc.begin()) {
 //    Serial.println("Couldn't find RTC");
 //    Serial.flush();
-    digitalWrite(34, LOW);
-    while (1);
-  }
+//    digitalWrite(34, LOW);
+//    while (1);
+//  }
 
   // automatically sets the RTC to the date & time on PC this sketch was compiled
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//  rtc.setTime()
   
   delay(100);
 
@@ -143,10 +147,10 @@ void setup(void)
 void loop() {
   dataFile = SD.open("ACCEL.txt", FILE_WRITE);
   start_time = millis();
-  DateTime now = rtc.now();
-  dataFile.print(now.hour());dataFile.print(":");dataFile.print(now.minute());dataFile.print(":");dataFile.println(now.second());
+//  DateTime now = rtc.now();
+//  dataFile.print(now.hour());dataFile.print(":");dataFile.print(now.minute());dataFile.print(":");dataFile.println(now.second());
 
-  while (millis() < 420000) { // 7 minutes 420000
+  while (millis() < testing_time) { // 1 minute 15 seconds 75000 // 7 minutes 420000
     if (enable) {
 
     // ------------------------------
@@ -207,8 +211,8 @@ void loop() {
 
       digitalWrite(23, HIGH);
       digitalWrite(24, HIGH);
-      digitalWrite(25, LOW); // change
-      digitalWrite(26, HIGH); 
+      digitalWrite(25, HIGH); 
+      digitalWrite(26, LOW); 
     
       // === Read acceleromter data === //
       Wire.beginTransmission(0x53);
