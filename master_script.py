@@ -52,7 +52,7 @@ def fourier(data, fs):
     # plotting centered data
     plt.subplot(3,1,1)
     plt.stem(xf,np.abs(yf))
-    plt.title('vibration_data x')
+    plt.title('vibration_data')
 
     plt.subplot(3,1,2)
     t = np.linspace(0,len(data)*100,num=len(data))
@@ -192,7 +192,6 @@ def main():
     plt.scatter(fail_arr[0][-20:-3],fail_arr[1][-20:-3],color="blue")
     plt.scatter(fail2_arr[0][-20:-3],fail2_arr[1][-20:-3],color="green")
     plt.xlim(0,50)
-    # plt.yscale("log")
     plt.show()
 
 
