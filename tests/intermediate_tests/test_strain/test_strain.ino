@@ -46,29 +46,29 @@ void loop()
   Serial.print(", strain1 raw: ");
   Serial.println(valRaw1);
   
-  // Read strain 2
-  val2 = wsb_strain2.measureForce();
-  valRaw2 = wsb_strain2.getLastForceRawADC();
-  Serial.print("strain2: ");
-  Serial.print(val3);
-  Serial.print(", strain2 raw: ");
-  Serial.println(valRaw3);
-  
-  // Read strain 3
-  val3 = wsb_strain3.measureForce();
-  valRaw3 = wsb_strain3.getLastForceRawADC();
-  Serial.print("strain3: ");
-  Serial.print(val3);
-  Serial.print(", strain3 raw: ");
-  Serial.println(valRaw3);
-  
-  // Read strain 4
-  val4 = wsb_strain4.measureForce();
-  valRaw4 = wsb_strain4.getLastForceRawADC();
-  Serial.print("strain4: ");
-  Serial.print(val4);
-  Serial.print(", strain4 raw: ");
-  Serial.println(valRaw4);
+//  // Read strain 2
+//  val2 = wsb_strain2.measureForce();
+//  valRaw2 = wsb_strain2.getLastForceRawADC();
+//  Serial.print("strain2: ");
+//  Serial.print(val3);
+//  Serial.print(", strain2 raw: ");
+//  Serial.println(valRaw3);
+//  
+//  // Read strain 3
+//  val3 = wsb_strain3.measureForce();
+//  valRaw3 = wsb_strain3.getLastForceRawADC();
+//  Serial.print("strain3: ");
+//  Serial.print(val3);
+//  Serial.print(", strain3 raw: ");
+//  Serial.println(valRaw3);
+//  
+//  // Read strain 4
+//  val4 = wsb_strain4.measureForce();
+//  valRaw4 = wsb_strain4.getLastForceRawADC();
+//  Serial.print("strain4: ");
+//  Serial.print(val4);
+//  Serial.print(", strain4 raw: ");
+//  Serial.println(valRaw4);
 
   //Serial.println(); //End of Row move to next row
     

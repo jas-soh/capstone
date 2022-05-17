@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from scipy.fft import rfft, rfftfreq
+from scipy.fft import rfft, rfftfreq, irfft
 from scipy.signal import butter, filtfilt, periodogram
 import matplotlib.pyplot as plt
 
@@ -36,7 +36,7 @@ def rainflow_analysis():
     return
 
 #def vibration_analysis(accel_readings):
-def vibration_analysis(data, fs):
+def fourier(data, fs):
 
 
     fig = plt.figure(figsize=(6,12))
@@ -49,11 +49,9 @@ def vibration_analysis(data, fs):
     yf = rfft(data_centered)
     xf = rfftfreq(N, 1 / fs)
 
-    # smooth_yf = threshold_noise_filter(yf,0)
-
     # plotting centered data
     plt.subplot(3,1,1)
-    plt.plot(xf,np.abs(yf))
+    plt.stem(xf,np.abs(yf))
     plt.title('vibration_data x')
 
     plt.subplot(3,1,2)
@@ -62,7 +60,18 @@ def vibration_analysis(data, fs):
 
     plt.show()
 
-    return data_centered
+    return np.abs(yf),xf
+
+def fundamental_freqs(xf, yf):
+    threshold = 400
+    yf[np.abs(yf)<threshold] = 0
+
+    # print(np.where(yf > 0))
+    points = np.transpose(np.stack((xf,yf)))
+    # print(points[:,1])
+    fundamental = points[points[:,1] > 0]
+
+    return yf
 
 def threshold_noise_filter(yf,percent):
     # avg_amplitude = np.sum(abs(yf)) / len(yf)
@@ -77,22 +86,31 @@ def threshold_noise_filter(yf,percent):
 
 def psd(x,fs):
     f, Pxx_den = periodogram(x, fs)
-    plt.plot(f, Pxx_den)
-    plt.xlabel('frequency [Hz]')
-    plt.ylabel('PSD [V**2/Hz]')
-    plt.show()
+    # plt.semilogy(f, Pxx_den)
+    # plt.xlabel('frequency [Hz]')
+    # plt.ylabel('PSD [V**2/Hz]')
+    # plt.show()
 
     return f, Pxx_den
     
 
 def psd_analysis(f, Pxx_den):
-    data = []
-    for i in range(len(f)):
-        data.append([f[i], Pxx_den[i]])
+    # threshold = 10
+    # Pxx_den[np.abs(Pxx_den)<threshold] = 0
+    # return Pxx_den
 
-    # sortedArr = arr2D[arr2D[:,columnIndex].argsort()]
-    # sorted_data = data[data[:,1].argsort()]
-    print(data)
+    # filter array
+    # print(f.shape,Pxx_den.shape)
+    arr = np.vstack((f,Pxx_den))
+    # print(arr)
+    filter = arr[1] > 2000
+    filtered_arr = arr[:,filter]
+
+    sorted_arr = np.sort(filtered_arr)
+    # print(sorted_arr)
+
+    return sorted_arr
+    
 
 def butter_lowpass_filter(data, fs):
     '''
@@ -108,7 +126,7 @@ def butter_lowpass_filter(data, fs):
     y = filtfilt(b, a, data)
 
     # plot filtered data
-    x = np.linspace(0,len(data)*fs,num=len(data))
+    # x = np.linspace(0,len(data)*fs,num=len(data))
     # plt.plot(x,data,color='blue')
     # plt.plot(x,y,color='red')
     # plt.show()
@@ -116,30 +134,72 @@ def butter_lowpass_filter(data, fs):
 
 
 def main():
-    #filename = "LOGDATA.CSV"
+    # ----- load accelerometer data file -----
     accel_filename = "data/ACCEL.txt"
-    # accel_filename = ("data/accelerometer.csv")
+    accel_filename = ("data/accelerometer.csv")
     accel_filename = ("data/vibrations.csv")
-    accel_df = csv_to_df(accel_filename)
+
+    accel_filename_nom = ("data/alt_test15_nom.txt")
+    accel_filename_fail = ("data/alt_test9_fail.txt")
+    accel_filename_fail2 = ("data/alt_test20_fail2.txt")
+
+    accel_df_nom = csv_to_df(accel_filename_nom)
+    accel_df_fail = csv_to_df(accel_filename_fail)
+    accel_df_fail2 = csv_to_df(accel_filename_fail2)
+    
+    # ----- load strain data file -----
     # strain_filename = "STRAIN.txt"
     # strain_df = csv_to_df(strain_filename)
 
+    # ----- define material constants -----
     material_const = 0.002 # todo
     fs = 100
 
-
-    #strain_gauge_readings, accel_readings = split_data(data_df)
-    #strain_analysis(material_const, strain_gauge_readings)
-
-    filtered1_x = butter_lowpass_filter(np.array(accel_df['accel1_x']),fs)
+    # ----- filter data using lowpass filter -----
+    filteredz_nom = butter_lowpass_filter(np.array(accel_df_nom['accel1_z']),fs)
+    filteredz_fail = butter_lowpass_filter(np.array(accel_df_fail['accel1_z']),fs)
+    filteredz_fail2 = butter_lowpass_filter(np.array(accel_df_fail2['accel1_z']),fs)
     # filtered1_y = butter_lowpass_filter(np.array(accel_df['accel1_y']), fs)
     # filtered1_z= butter_lowpass_filter(np.array(accel_df['accel1_z']), 100)
 
-    # vibration_analysis(filtered_x1, fs
 
-    f, Pxx_den = psd(filtered1_x,fs)
-    psd_analysis(f, Pxx_den)
+    # ----- fourier transform -----
+    yf_nom, xf_nom = fourier(filteredz_nom, 100)
+    yf_fail, xf_fail = fourier(filteredz_fail, 100)
+    yf_fail2, xf_fail2 = fourier(filteredz_fail2, 100)
+
+    # ----- identify fundamental frequencies from fft -----
+    # yf = fundamental_freqs(xf,yf)
+
+    # ----- periodogram analysis and comparison -----
+    f_nom, Pxx_den_nom = psd(filteredz_nom,fs)
+    f_fail, Pxx_den_fail = psd(filteredz_fail,fs)
+    f_fail2, Pxx_den_fail2 = psd(filteredz_fail2,fs)
+
+    # plt.scatter(f_nom, Pxx_den_nom,color="red")
+    # plt.scatter(f_fail, Pxx_den_fail,color="blue")
+    # plt.scatter(f_fail2, Pxx_den_fail2,color="green")
+    # plt.xlabel('frequency [Hz]')
+    # plt.ylabel('PSD [V**2/Hz]')
+    # plt.show()
+
+
+    norm_arr = psd_analysis(f_nom, Pxx_den_nom)
+    fail_arr = psd_analysis(f_fail, Pxx_den_fail)
+    fail2_arr = psd_analysis(f_fail2, Pxx_den_fail2)
+
+    plt.scatter(norm_arr[0][-20:-3],norm_arr[1][-20:-3],color="red")
+    plt.scatter(fail_arr[0][-20:-3],fail_arr[1][-20:-3],color="blue")
+    plt.scatter(fail2_arr[0][-20:-3],fail2_arr[1][-20:-3],color="green")
+    plt.xlim(0,50)
+    # plt.yscale("log")
+    plt.show()
+
+
+    # # Do a Fourier transform on the signal
     
-    # vibration_analysis(filtered1_x, fs)
+    # tx  = np.fft.fft(a)
+    # print(tx.shape)
+
 
 main()

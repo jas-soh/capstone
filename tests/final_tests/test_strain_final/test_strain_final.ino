@@ -7,6 +7,7 @@
 #include <WheatstoneBridge.h>
 #include <RTClib.h>
 
+unsigned long testing_time = 4200; // change this to change the length of time (in milliseconds) to record data; 75000 is 1 minute 15 seconds; 7 minutes 420000
 int ADXLAddress = 0x53; // Device address in which is also included the 8th bit for selecting the mode, read in this case.
 
 #define X_Axis_Register_DATAX0 0x32 // Hexadecimal address for the DATAX0 internal register.
@@ -75,15 +76,15 @@ void setup(void)
   delay(10);
 
   // SETUP RTC MODULE
-  if (! rtc.begin()) {
+//  if (! rtc.begin()) {
 //    Serial.println("Couldn't find RTC");
 //    Serial.flush();
-    digitalWrite(34, LOW);
-    while (1);
-  }
+//    digitalWrite(34, LOW);
+//    while (1);
+//  }
 
   // automatically sets the RTC to the date & time on PC this sketch was compiled
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
 
   delay(100);
 }
@@ -93,10 +94,10 @@ void setup(void)
 
 void loop() {
   uint16_t start_millis = millis();
-  DateTime now = rtc.now();
-  strainFile.print(now.hour());strainFile.print(":");strainFile.print(now.minute());strainFile.print(":");strainFile.println(now.second());
+//  DateTime now = rtc.now();
+//  strainFile.print(now.hour());strainFile.print(":");strainFile.print(now.minute());strainFile.print(":");strainFile.println(now.second());
 
-  while (millis() < 420000) { // 7 minutes
+  while (millis() < testing_time) { // 7 minutes
     if (enable) {
 
       time = millis() - start_millis;
