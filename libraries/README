@@ -1,1 +1,3 @@
-
+Command line: python master_script.py
+Analyze different datasets by changing the filename in accel_filename...
+At the moment, datasets need to be manually windowed from the data log captured during the entire test flight.
