@@ -42,10 +42,10 @@ int val4;
 int valRaw4;
 
 // ----------------- accelerometer -----------------------
-int8_t X1; int8_t Y1; int8_t Z1;
-int8_t X2; int8_t Y2; int8_t Z2;
-int8_t X3; int8_t Y3; int8_t Z3;
-int8_t X4; int8_t Y4; int8_t Z4;
+int16_t X1; int16_t Y1; int16_t Z1;
+int16_t X2; int16_t Y2; int16_t Z2;
+int16_t X3; int16_t Y3; int16_t Z3;
+int16_t X4; int16_t Y4; int16_t Z4;
 
 
 // --------------------------------------------------------------
@@ -152,7 +152,7 @@ void setup(void)
   delay(10);
 
   // ---------- Timer setup ----------
-  accel_timer.every(10,print_accel);
+  accel_timer.every(5,print_accel);
   accel_timer.every(200,print_strain);
   
   delay(100);
@@ -162,19 +162,19 @@ void setup(void)
   dataFile = SD.open("ACCEL.txt", FILE_WRITE);
   dataFile.println("time,accel1_x,accel1_y,accel1_z,accel2_x,accel2_y,accel2_z,accel3_x,accel3_y,accel3_z,accel4_x,accel4_y,accel4_z");
 
-  // SETUP RTC MODULE
-  if (! rtc.begin()) {
-    digitalWrite(34, LOW);
-    while (1);
-  }
+//  // SETUP RTC MODULE
+//  if (! rtc.begin()) {
+//    digitalWrite(34, LOW);
+//    while (1);
+//  }
+//
+//  // automatically sets the RTC to the date & time on PC this sketch was compiled
+//  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+//
+//  start_millis = millis();
+//  DateTime now = rtc.now();
 
-  // automatically sets the RTC to the date & time on PC this sketch was compiled
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-
-  start_millis = millis();
-  DateTime now = rtc.now();
-
-  dataFile.print(now.hour());dataFile.print(":");dataFile.print(now.minute());dataFile.print(":");dataFile.println(now.second());
+//  dataFile.print(now.hour());dataFile.print(":");dataFile.print(now.minute());dataFile.print(":");dataFile.println(now.second());
 
 //  Timer1.initialize(); //Initialize timer with 1 millisecond period
 //  Timer1.setPeriod(10000);
@@ -189,21 +189,21 @@ void sample_accel() {
   time = millis() - start_millis;
 
   // ------------------------------
-  digitalWrite(23, LOW);
-  digitalWrite(24, HIGH);
-  digitalWrite(25, HIGH);
-  digitalWrite(26, HIGH); 
-  
-  // === Read acceleromter data === //
-  Wire.beginTransmission(0x53);
-  Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
-  Wire.endTransmission(false);
-  Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
-
-  X1 = ( Wire.read()| Wire.read() << 8); // X-axis value
-  Y1 = ( Wire.read()| Wire.read() << 8); // Y-axis value
-  Z1 = ( Wire.read()| Wire.read() << 8); // Z-axis value
-  Wire.endTransmission();
+//  digitalWrite(23, LOW);
+//  digitalWrite(24, HIGH);
+//  digitalWrite(25, HIGH);
+//  digitalWrite(26, HIGH); 
+//  
+//  // === Read acceleromter data === //
+//  Wire.beginTransmission(0x53);
+//  Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
+//  Wire.endTransmission(false);
+//  Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+//
+//  X1 = ( Wire.read()| Wire.read() << 8); // X-axis value
+//  Y1 = ( Wire.read()| Wire.read() << 8); // Y-axis value
+//  Z1 = ( Wire.read()| Wire.read() << 8); // Z-axis value
+//  Wire.endTransmission();
 
 // ------------------------------
 
@@ -243,30 +243,24 @@ void sample_accel() {
 
 // ------------------------------
 
-  digitalWrite(23, HIGH);
-  digitalWrite(24, HIGH);
-  digitalWrite(25, LOW); // change
-  digitalWrite(26, HIGH); 
-
-  // === Read acceleromter data === //
-  Wire.beginTransmission(0x53);
-  Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
-  Wire.endTransmission(false);
-  Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
-
-  X4 = ( Wire.read()| Wire.read() << 8); // X-axis value
-  Y4 = ( Wire.read()| Wire.read() << 8); // Y-axis value
-  Z4 = ( Wire.read()| Wire.read() << 8); // Z-axis value
-  Wire.endTransmission();
+//  digitalWrite(23, HIGH);
+//  digitalWrite(24, HIGH);
+//  digitalWrite(25, LOW); // change
+//  digitalWrite(26, HIGH); 
+//
+//  // === Read acceleromter data === //
+//  Wire.beginTransmission(0x53);
+//  Wire.write(0x32); // Start with register 0x32 (ACCEL_XOUT_H)
+//  Wire.endTransmission(false);
+//  Wire.requestFrom(0x53, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+//
+//  X4 = ( Wire.read()| Wire.read() << 8); // X-axis value
+//  Y4 = ( Wire.read()| Wire.read() << 8); // Y-axis value
+//  Z4 = ( Wire.read()| Wire.read() << 8); // Z-axis value
+//  Wire.endTransmission();
 
 // ------------------------------
 
-//  dataFile.print(time);dataFile.print(",");
-////      dataFile.print(minute);dataFile.print(":");dataFile.print(second);dataFile.print(",");
-//  dataFile.print(X1);dataFile.print(",");dataFile.print(Y1);dataFile.print(",");dataFile.print(Z1);dataFile.print(",");
-//  dataFile.print(X2);dataFile.print(",");dataFile.print(Y2);dataFile.print(",");dataFile.print(Z2);dataFile.print(",");
-//  dataFile.print(X3);dataFile.print(",");dataFile.print(Y3);dataFile.print(",");dataFile.print(Z3);dataFile.print(",");
-//  dataFile.print(X4);dataFile.print(",");dataFile.print(Y4);dataFile.print(",");dataFile.println(Z4);
 
 }
 
@@ -279,20 +273,15 @@ void sample_strain() {
   valRaw3 = wsb_strain3.getLastForceRawADC();
   val4 = wsb_strain4.measureForce();
   valRaw4 = wsb_strain4.getLastForceRawADC();
-//  strainFile.print(time);strainFile.print(",");
-//  strainFile.print((uint8_t)valRaw1);strainFile.print(",");
-//  strainFile.print((uint8_t)valRaw2);strainFile.print(",");
-//  strainFile.print((uint8_t)valRaw3);strainFile.print(",");
-//  strainFile.println((uint8_t)valRaw4);
 
 }
 
 bool print_strain(void) {
   strainFile.print(time);strainFile.print(",");
-  strainFile.print((uint8_t)valRaw1);strainFile.print(",");
-  strainFile.print((uint8_t)valRaw2);strainFile.print(",");
-  strainFile.print((uint8_t)valRaw3);strainFile.print(",");
-  strainFile.println((uint8_t)valRaw4);
+  strainFile.print(valRaw1);strainFile.print(",");
+  strainFile.print(valRaw2);strainFile.print(",");
+  strainFile.print(valRaw3);strainFile.print(",");
+  strainFile.println(valRaw4);
   return true;
 }
 
@@ -300,16 +289,11 @@ bool print_accel(void) {
 //  enable = true;
   dataFile.print(time);dataFile.print(",");
 //      dataFile.print(minute);dataFile.print(":");dataFile.print(second);dataFile.print(",");
-  dataFile.print(X1);dataFile.print(",");dataFile.print(Y1);dataFile.print(",");dataFile.print(Z1);dataFile.print(",");
+//  dataFile.print(X1);dataFile.print(",");dataFile.print(Y1);dataFile.print(",");dataFile.print(Z1);dataFile.print(",");
   dataFile.print(X2);dataFile.print(",");dataFile.print(Y2);dataFile.print(",");dataFile.print(Z2);dataFile.print(",");
-  dataFile.print(X3);dataFile.print(",");dataFile.print(Y3);dataFile.print(",");dataFile.print(Z3);dataFile.print(",");
-  dataFile.print(X4);dataFile.print(",");dataFile.print(Y4);dataFile.print(",");dataFile.println(Z4);
-//  if (sample_count == 20) {
-//    get_strain();
-//    sample_count = 0;
-//  } else {
-//    sample_count++;
-//  }
+  dataFile.print(X3);dataFile.print(",");dataFile.print(Y3);dataFile.print(",");dataFile.println(Z3);
+//  dataFile.print(X4);dataFile.print(",");dataFile.print(Y4);dataFile.print(",");dataFile.println(Z4);
+
   return true;
 }
 
@@ -319,7 +303,7 @@ void loop() {
   accel_timer.tick();
 //  strain_timer.tick();
 
-  if (millis() > 5000) {
+  if (millis() > 270000) {
     accel_timer.cancel();
 //    strain_timer.cancel();
     

@@ -7,7 +7,7 @@
 #include <WheatstoneBridge.h>
 #include <RTClib.h>
 
-unsigned long testing_time = 4200; // change this to change the length of time (in milliseconds) to record data; 75000 is 1 minute 15 seconds; 7 minutes 420000
+unsigned long testing_time = 270000; // change this to change the length of time (in milliseconds) to record data; 75000 is 1 minute 15 seconds; 7 minutes 420000
 int ADXLAddress = 0x53; // Device address in which is also included the 8th bit for selecting the mode, read in this case.
 
 #define X_Axis_Register_DATAX0 0x32 // Hexadecimal address for the DATAX0 internal register.

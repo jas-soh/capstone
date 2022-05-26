@@ -8,7 +8,7 @@
 #include <WheatstoneBridge.h>
 #include <RTClib.h>
 
-unsigned long testing_time = 6000; // change this to change the length of time (in milliseconds) to record data; 75000 is 1 minute 15 seconds; 7 minutes 420000
+unsigned long testing_time =  240000; // change this to change the length of time (in milliseconds) to record data; 75000 is 1 minute 15 seconds; 7 minutes 420000
 int ADXLAddress = 0x53; // Device address in which is also included the 8th bit for selecting the mode, read in this case.
 
 #define X_Axis_Register_DATAX0 0x32 // Hexadecimal address for the DATAX0 internal register.
@@ -293,7 +293,7 @@ void sample_strain() {
 }
 
 void print_strain() {
-  strainFile.print(millis());strainFile.print(",");
+  strainFile.print(time);strainFile.print(",");
   strainFile.print(valRaw1);strainFile.print(",");
   strainFile.print(valRaw2);strainFile.print(",");
   strainFile.print(valRaw3);strainFile.print(",");
@@ -308,7 +308,7 @@ void print_accel() {
 //  X3 = (int16_t) 600; Y3 = (int16_t) 600; Z3 = (int16_t) 600; 
 //  X4 = (int16_t) 600; Y4 = (int16_t) 600; Z4 = (int16_t) 600;
 
-  dataFile.print(millis());dataFile.print(",");
+  dataFile.print(time);dataFile.print(",");
 //      dataFile.print(minute);dataFile.print(":");dataFile.print(second);dataFile.print(",");
   dataFile.print(X1);dataFile.print(",");dataFile.print(Y1);dataFile.print(",");dataFile.print(Z1);dataFile.print(",");
   dataFile.print(X2);dataFile.print(",");dataFile.print(Y2);dataFile.print(",");dataFile.print(Z2);dataFile.print(",");
@@ -318,7 +318,7 @@ void print_accel() {
 }
 
 void loop() {
-//  time = millis();
+  time = millis();
   sample_accel();
   sample_strain();
 
