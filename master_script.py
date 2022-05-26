@@ -1,7 +1,16 @@
 import pandas as pd
 import numpy as np
+import scipy
 from scipy.fft import rfft, rfftfreq, irfft
+<<<<<<< HEAD
 from scipy.signal import butter, filtfilt, periodogram, welch, lombscargle
+=======
+from scipy.signal import butter, filtfilt, periodogram, lfilter, freqz
+import scipy.fft
+import scipy.fftpack
+import matplotlib
+matplotlib.use("TkAgg")
+>>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 import matplotlib.pyplot as plt
 
 
@@ -146,10 +155,32 @@ def comparison(nominal, data):
         both have shape of length x 2 (column 1 is frequency, column 2 is energy)
     """
 
+<<<<<<< HEAD
     # comarison method: Euclidean norm for
     i = -1
     norm = np.linalg.norm(nominal[-1] - data[-1])
     print(norm)
+=======
+def fourier_2(data):
+    fs = 100
+    yf = scipy.fft.fft(data)
+    filtered_y = butter_lowpass_filter(data, fs)
+    filtered_yf = scipy.fft.fft(filtered_y)
+    x = scipy.fftpack.fftfreq(yf.size, 1 / 100)
+    filtered_x = scipy.fftpack.fftfreq(filtered_yf.size, 1 / 100)
+
+    fig = plt.figure(figsize=(6,12))
+
+    x_nom = filtered_x[:filtered_x.size//2]
+    y_nom = abs(filtered_yf)[:filtered_yf.size//2]
+    return x_nom, y_nom
+
+def main():
+    # ----- load accelerometer data file -----
+    accel_filename = "data/ACCEL.txt"
+    accel_filename = ("data/accelerometer.csv")
+    accel_filename = ("data/vibrations.csv")
+>>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
 
 def vibration_analysis(accel_filename, fs, col_name, color, mark="o",label=None): # remove accel_num, color    
@@ -163,7 +194,17 @@ def vibration_analysis(accel_filename, fs, col_name, color, mark="o",label=None)
     filtered_data = filtered_data - np.mean(filtered_data)
 
     # ----- fourier transform -----
+<<<<<<< HEAD
     # yf, xf = fourier(filtered_data, fs)
+=======
+    yf_nom, xf_nom = fourier(filteredz_nom, 100)
+    yf_fail, xf_fail = fourier(filteredz_fail, 100)
+    yf_fail2, xf_fail2 = fourier(filteredz_fail2, 100)
+
+
+    # ----- identify fundamental frequencies from fft -----
+    # yf = fundamental_freqs(xf,yf)
+>>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
     # ----- periodogram analysis and comparison -----
     # freq, Pxx_den = psd(filtered_data,fs)
@@ -210,9 +251,21 @@ def get_strain(df, col):
 
 def main():
 
+<<<<<<< HEAD
     # ----- define material constants -----
     material_const = 0.002 # todo
     fs = 100
+=======
+    plt.scatter(norm_arr[0][:],norm_arr[1][:],color="red")
+    plt.scatter(fail_arr[0][:],fail_arr[1][:],color="blue")
+    plt.scatter(fail2_arr[0][:],fail2_arr[1][:],color="green")
+
+    #plt.scatter(norm_arr[0][-20:-3],norm_arr[1][-20:-3],color="red")
+    #plt.scatter(fail_arr[0][-20:-3],fail_arr[1][-20:-3],color="blue")
+    #plt.scatter(fail2_arr[0][-20:-3],fail2_arr[1][-20:-3],color="green")
+    plt.xlim(0,50)
+    plt.show()
+>>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
     # ----- load accelerometer data file -----
     accel_filename = ("data/alt_test14_nom.txt")
@@ -254,6 +307,31 @@ def main():
     # plt.xlim(10,35)
     # plt.show()
 
+<<<<<<< HEAD
+=======
+    # # Do a Fourier transform on the signal
+    
+    # tx  = np.fft.fft(a)
+    # print(tx.shape)
+    data_z_nom = accel_df_nom['accel1_z'].values
+    x_nom, y_nom = fourier_2(data_z_nom)
+    x_nom = x_nom[4:]
+    y_nom = y_nom[4:]
+    data_z_fail = accel_df_fail['accel1_z'].values
+    x_fail, y_fail = fourier_2(data_z_fail)
+    x_fail = x_fail[4:]
+    y_fail = y_fail[4:]
+    data_z_fail2 = accel_df_fail2['accel1_z'].values
+    x_fail2, y_fail2 = fourier_2(data_z_fail2)
+    x_fail2 = x_fail2[4:]
+    y_fail2 = y_fail2[4:]
+
+    plt.plot(x_nom, y_nom, color="red")
+    plt.plot(x_fail, y_fail, color="blue")
+    plt.plot(x_fail2, y_fail2, color="green")
+    plt.title('FFT Vibe z axis')
+    plt.show()
+>>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
 
 main()
