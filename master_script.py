@@ -2,15 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy
 from scipy.fft import rfft, rfftfreq, irfft
-<<<<<<< HEAD
 from scipy.signal import butter, filtfilt, periodogram, welch, lombscargle
-=======
-from scipy.signal import butter, filtfilt, periodogram, lfilter, freqz
-import scipy.fft
-import scipy.fftpack
-import matplotlib
-matplotlib.use("TkAgg")
->>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 import matplotlib.pyplot as plt
 
 
@@ -31,7 +23,7 @@ def split_data(data_df):
     Output: two dataframes - one of strain gauge readings, one of accelerometer readings
     """
     strain_gauge_readings = data_df.loc[:,'time':'valRaw4']
-    accel_readings = data_df.loc[:,'accel1_x':'accel4_z']
+    accel_readings = data_df.loc[:,'accel1_x':'accel4_y']
 
     print(strain_gauge_readings)
     print(accel_readings)
@@ -155,32 +147,10 @@ def comparison(nominal, data):
         both have shape of length x 2 (column 1 is frequency, column 2 is energy)
     """
 
-<<<<<<< HEAD
     # comarison method: Euclidean norm for
     i = -1
     norm = np.linalg.norm(nominal[-1] - data[-1])
     print(norm)
-=======
-def fourier_2(data):
-    fs = 100
-    yf = scipy.fft.fft(data)
-    filtered_y = butter_lowpass_filter(data, fs)
-    filtered_yf = scipy.fft.fft(filtered_y)
-    x = scipy.fftpack.fftfreq(yf.size, 1 / 100)
-    filtered_x = scipy.fftpack.fftfreq(filtered_yf.size, 1 / 100)
-
-    fig = plt.figure(figsize=(6,12))
-
-    x_nom = filtered_x[:filtered_x.size//2]
-    y_nom = abs(filtered_yf)[:filtered_yf.size//2]
-    return x_nom, y_nom
-
-def main():
-    # ----- load accelerometer data file -----
-    accel_filename = "data/ACCEL.txt"
-    accel_filename = ("data/accelerometer.csv")
-    accel_filename = ("data/vibrations.csv")
->>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
 
 def vibration_analysis(accel_filename, fs, col_name, color, mark="o",label=None): # remove accel_num, color    
@@ -194,17 +164,7 @@ def vibration_analysis(accel_filename, fs, col_name, color, mark="o",label=None)
     filtered_data = filtered_data - np.mean(filtered_data)
 
     # ----- fourier transform -----
-<<<<<<< HEAD
     # yf, xf = fourier(filtered_data, fs)
-=======
-    yf_nom, xf_nom = fourier(filteredz_nom, 100)
-    yf_fail, xf_fail = fourier(filteredz_fail, 100)
-    yf_fail2, xf_fail2 = fourier(filteredz_fail2, 100)
-
-
-    # ----- identify fundamental frequencies from fft -----
-    # yf = fundamental_freqs(xf,yf)
->>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
     # ----- periodogram analysis and comparison -----
     # freq, Pxx_den = psd(filtered_data,fs)
@@ -227,7 +187,7 @@ def vibration_analysis(accel_filename, fs, col_name, color, mark="o",label=None)
 
     # comparison(norm_arr, fail2_arr)
 
-def get_strain(df, col):
+def get_strain(df, col, V_offset):
     # system values
     R1 = 820 # ohms
     R2 = 820 # ohms
@@ -236,102 +196,68 @@ def get_strain(df, col):
     K = 1.93 # gauge factor
     V_in = 3.3 # V
     gain = 495
-    V_offset = 105 * 5 / 1024 #df[col][0] * 5 / 1024 #0.5 # V
+    V_offset = V_offset * 5 / 1024 #0.5 # V
     E = 68.9
 
+    print("v offset:",V_offset)
+
     ADC_val = df[col]
-    term1 = R2 / ((((ADC_val) * (5 / 1024) - V_offset) / (gain * V_in)) + (R1 / (R1 + R3)))
+    term1 = -1 * R2 / ((((ADC_val) * (5 / 1024) - V_offset) / (gain * V_in)) - (R1 / (R1 + R3)))
     term2 = R2 + R_sg
     term3 = R_sg * K
     strain_measured = (term1 - term2) / term3
     
-    df['raw_strain_' + col] = strain_measured
-    df['stress_' + col] = df['raw_strain_' + col] * E
+    df['raw_' + col] = strain_measured
+    df['stress_' + col] = df['raw_' + col] * E
     return df
 
 def main():
 
-<<<<<<< HEAD
     # ----- define material constants -----
     material_const = 0.002 # todo
     fs = 100
-=======
-    plt.scatter(norm_arr[0][:],norm_arr[1][:],color="red")
-    plt.scatter(fail_arr[0][:],fail_arr[1][:],color="blue")
-    plt.scatter(fail2_arr[0][:],fail2_arr[1][:],color="green")
-
-    #plt.scatter(norm_arr[0][-20:-3],norm_arr[1][-20:-3],color="red")
-    #plt.scatter(fail_arr[0][-20:-3],fail_arr[1][-20:-3],color="blue")
-    #plt.scatter(fail2_arr[0][-20:-3],fail2_arr[1][-20:-3],color="green")
-    plt.xlim(0,50)
-    plt.show()
->>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
 
     # ----- load accelerometer data file -----
     accel_filename = ("data/alt_test14_nom.txt")
 
     # ----- load strain data file -----
-    strain_filename = "data/strain_test1_hover.txt"
-    strain_raw_df = csv_to_df(strain_filename)
-    strain_df = get_strain(strain_raw_df,'strain2')
-    print(strain_df)
+    # strain_filename = "data/strain_test1_hover.txt"
+    # strain_raw_df = csv_to_df(strain_filename)
+    # strain_df = get_strain(strain_raw_df,'strain2')
+    # print(strain_df)
 
 
-    # vibration_analysis("data/alt_test14_nom.txt", fs, "accel1_z", "black")
-    # vibration_analysis("data/alt_test14_nom.txt", fs, "accel2_z", "black", mark="x",label="nominal")
-    # vibration_analysis("data/alt_test15_nom.txt", fs, "accel1_z", "black")
-    # vibration_analysis("data/alt_test15_nom.txt", fs, "accel2_z", "black", mark="x")
+    vibration_analysis("data/alt_test14_nom.txt", fs, "accel1_y", "black")
+    vibration_analysis("data/alt_test14_nom.txt", fs, "accel2_y", "black", mark="x",label="nominal")
+    vibration_analysis("data/alt_test15_nom.txt", fs, "accel1_y", "black")
+    vibration_analysis("data/alt_test15_nom.txt", fs, "accel2_y", "black", mark="x")
 
-    # vibration_analysis("data/alt_test8_fail.txt", fs, "accel1_z", "orange")
-    # vibration_analysis("data/alt_test8_fail.txt", fs, "accel2_z", "orange", mark="x")
-    # vibration_analysis("data/alt_test9_fail.txt", fs, "accel1_z", "orange")
-    # vibration_analysis("data/alt_test9_fail.txt", fs, "accel2_z", "orange", mark="x",label="small cut ")
-    # vibration_analysis("data/alt_test10_fail.txt", fs, "accel1_z", "orange")
-    # vibration_analysis("data/alt_test10_fail.txt", fs, "accel2_z", "orange", mark="x")
+    # vibration_analysis("data/alt_test8_fail.txt", fs, "accel1_y", "orange")
+    # vibration_analysis("data/alt_test8_fail.txt", fs, "accel2_y", "orange", mark="x")
+    # vibration_analysis("data/alt_test9_fail.txt", fs, "accel1_y", "orange")
+    vibration_analysis("data/alt_test9_fail.txt", fs, "accel2_y", "orange", mark="x",label="small cut ")
+    # vibration_analysis("data/alt_test10_fail.txt", fs, "accel1_y", "orange")
+    vibration_analysis("data/alt_test10_fail.txt", fs, "accel2_y", "orange", mark="x")
 
 
-    # vibration_analysis("data/alt_test20_fail2.txt", fs, "accel1_z", "red")
-    # vibration_analysis("data/alt_test20_fail2.txt", fs, "accel2_z", "red", mark="x",label="big cut")
-    # vibration_analysis("data/alt_test19_fail2.txt", fs, "accel1_z", "red")
-    # vibration_analysis("data/alt_test19_fail2.txt", fs, "accel2_z", "red", mark="x")
+    # vibration_analysis("data/alt_test20_fail2.txt", fs, "accel1_y", "red")
+    vibration_analysis("data/alt_test20_fail2.txt", fs, "accel2_y", "red", mark="x",label="big cut")
+    # vibration_analysis("data/alt_test19_fail2.txt", fs, "accel1_y", "red")
+    vibration_analysis("data/alt_test19_fail2.txt", fs, "accel2_y", "red", mark="x")
 
     # ---------- in flight tests ----------
-    # vibration_analysis("data/alt_val1_accel_hover.txt", fs, "accel1_z", "green")
-    # vibration_analysis("data/alt_val2_accel_casual.txt", fs, "accel1_z", "blue")
+    vibration_analysis("data/val1_accel_hover.txt", fs, "accel1_y", "green")
+    vibration_analysis("data/val2_accel_casual.txt", fs, "accel1_y", "blue")
+    vibration_analysis("data/val3_accel_agg.txt", fs, "accel1_y", "red")
 
-    # plt.xlabel('frequency [Hz]')
-    # plt.ylabel('Z axis PSD (acceleration) [g**2/Hz]')
-    # plt.legend()
-    # plt.title("Z-Axis Power Spectral Density")
+    plt.xlabel('frequency [Hz]')
+    plt.ylabel('Z axis PSD (acceleration) [g**2/Hz]')
+    plt.legend()
+    plt.title("Z-Axis Power Spectral Density")
     # plt.ylim(0,0.8)
     # plt.xlim(10,35)
-    # plt.show()
-
-<<<<<<< HEAD
-=======
-    # # Do a Fourier transform on the signal
-    
-    # tx  = np.fft.fft(a)
-    # print(tx.shape)
-    data_z_nom = accel_df_nom['accel1_z'].values
-    x_nom, y_nom = fourier_2(data_z_nom)
-    x_nom = x_nom[4:]
-    y_nom = y_nom[4:]
-    data_z_fail = accel_df_fail['accel1_z'].values
-    x_fail, y_fail = fourier_2(data_z_fail)
-    x_fail = x_fail[4:]
-    y_fail = y_fail[4:]
-    data_z_fail2 = accel_df_fail2['accel1_z'].values
-    x_fail2, y_fail2 = fourier_2(data_z_fail2)
-    x_fail2 = x_fail2[4:]
-    y_fail2 = y_fail2[4:]
-
-    plt.plot(x_nom, y_nom, color="red")
-    plt.plot(x_fail, y_fail, color="blue")
-    plt.plot(x_fail2, y_fail2, color="green")
-    plt.title('FFT Vibe z axis')
     plt.show()
->>>>>>> 636a33f9b2736dba0df0cdeb7c0143cfd3b3d57e
+
 
 
 main()
